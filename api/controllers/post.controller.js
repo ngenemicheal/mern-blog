@@ -31,9 +31,9 @@ export const getposts = async (req, res, next) => {
         const sortDirection = req.query.order === 'asc' ? 1 : -1;
         const posts = await Post.find({
             ...(req.query.userID && { userID: req.query.userID }),
-            ...(req.query.catergory && { userID: req.query.catergory }),
-            ...(req.query.slug && { userID: req.query.slug }),
-            ...(req.query.postID && { userID: req.query.postID }),
+            ...(req.query.catergory && { category: req.query.catergory }),
+            ...(req.query.slug && { slug: req.query.slug }),
+            ...(req.query.postID && { _id: req.query.postID }),
             ...(req.query.searchTerm && { 
                 $or: [
                     { title: { $regex: req.query.searchTerm, options: 'i' } },
@@ -72,6 +72,28 @@ export const deletepost = async (req, res, next) => {
     try {
         await Post.findByIdAndDelete(req.params.postID);
         res.status(200).json('This Post has been deleted');
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const updatepost = async (req, res, next) => {
+    if (!req.user.isAdmin || req.user.id !== req.params.userID) {
+        return next(errorHandler(403, 'Not Allowed'));
+    }
+    try {
+        const updatedPost = await Post.findByIdAndUpdate(
+            req.params.postID,
+            {
+                $set: {
+                    title: req.body.title,
+                    content: req.body.content,
+                    category: req.body.category,
+                    image: req.body.image,
+                }
+            }, {new: true})
+            res.status(200).json(updatedPost);
+
     } catch (error) {
         next(error);
     }
