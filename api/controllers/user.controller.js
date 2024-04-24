@@ -52,7 +52,7 @@ export const updateUser = async (req, res, next) => {
 };
 
 export const deleteUser = async (req, res, next) => {
-    if (req.user.id !== req.params.userID) {
+    if (!req.user.isAdmin && req.user.id !== req.params.userID) {
         return next(errorHandler(403, 'Not Allowed'));
     }
     try {
