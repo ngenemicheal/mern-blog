@@ -2,10 +2,38 @@ import React, { useEffect, useState } from 'react';
 import moment from 'moment';
 import { FaThumbsUp } from 'react-icons/fa';
 import { useSelector } from 'react-redux';
+import { Button, Textarea } from 'flowbite-react';
 
-export default function Comment({comment, onLike}) {
+export default function Comment({comment, onLike, onEdit}) {
     const [user, setUser] = useState({});
     const { currentUser } = useSelector((state) => state.user);
+    const [isEditing, setIsEditing] = useState(false);
+    const [editedComment, setEditedComment] = useState(comment.content);
+
+    const handleEdit = () => {
+        setIsEditing(true);
+        setEditedComment(comment.content);
+    };
+
+    const handleSave = async () => {
+        try {
+            const res = await fetch(`/api/comment/editComment/${comment._id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    content: editedComment
+                })
+            });
+            if (res.ok) {
+                setIsEditing(false);
+                onEdit(comment, editedComment);
+            }
+        } catch (error) {
+            console.log(error.message);
+        }
+    };
 
     useEffect(() => {
         const getUser = async () => {
@@ -31,15 +59,34 @@ export default function Comment({comment, onLike}) {
                 <span className='font-bold mr-1 text-xs truncate'>{user ? `@${user.username}` : 'Anonymous User'}</span>
                 <span className='text-gray-500 text-xs'>{moment(comment.createdAt).fromNow()}</span>
             </div>
-            <p className='text-gray-500 pb-2'>{comment.content}</p>
-            <div className='flex items-center pt-2 text-xs border-t dark:border-gray-700 max-w-fit gap-2'>
-                <button onClick={()=>onLike(comment._id)} type='button' className={`text-gray-400 hover:text-blue-500 ${currentUser && comment.likes.includes(currentUser._id) && '!text-blue-500'}`}>
-                    <FaThumbsUp className='text-sm' />
-                </button>
-                <p className='text-gray-400'>
-                    {comment.numberOfLikes > 0 && comment.numberOfLikes + ' ' + (comment.numberOfLikes === 1 ? "like" : "likes")}
-                </p>
-            </div>
+            {isEditing ? (
+                <>
+                    <Textarea className='mb-2' value={editedComment} onChange={(e) => setEditedComment(e.target.value)} />
+                    <div className='flex justify-end gap-2 text-xs'>
+                        <Button type='button' size='sm' gradientDuoTone='purpleToBlue' onClick={handleSave}>Save</Button>
+                        <Button type='button' size='sm' gradientDuoTone='purpleToBlue' outline onClick={()=>setIsEditing(false)}>Cancel</Button>
+                    </div>
+                </>
+            ) : (
+                <>
+                    <p className='text-gray-500 pb-2'>{comment.content}</p>
+                    <div className='flex items-center pt-2 text-xs border-t dark:border-gray-700 max-w-fit gap-2'>
+                        <button onClick={()=>onLike(comment._id)} type='button' className={`text-gray-400 hover:text-blue-500 ${currentUser && comment.likes.includes(currentUser._id) && '!text-blue-500'}`}>
+                            <FaThumbsUp className='text-sm' />
+                        </button>
+                        <p className='text-gray-400'>
+                            {comment.numberOfLikes > 0 && comment.numberOfLikes + ' ' + (comment.numberOfLikes === 1 ? "like" : "likes")}
+                        </p>
+                        {
+                            currentUser && (currentUser._id === comment.userID || currentUser.isAdmin) && (
+                                <button onClick={handleEdit} type='button' className='text-gray-400 hover:text-blue-500'>
+                                    Edit
+                                </button>
+                            )
+                        }
+                    </div>
+                </>
+            )}
         </div>
     </div>
   )
