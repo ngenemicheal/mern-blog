@@ -15,4 +15,4 @@ ReactDOM.createRoot(document.getElementById('root')).render(
       </ThemeProvider>
     </Provider>
   </PersistGate>
-)
+);
