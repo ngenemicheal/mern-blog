@@ -31,13 +31,13 @@ export const getposts = async (req, res, next) => {
         const sortDirection = req.query.order === 'asc' ? 1 : -1;
         const posts = await Post.find({
             ...(req.query.userID && { userID: req.query.userID }),
-            ...(req.query.catergory && { category: req.query.catergory }),
+            ...(req.query.category && { category: req.query.category }),
             ...(req.query.slug && { slug: req.query.slug }),
             ...(req.query.postID && { _id: req.query.postID }),
             ...(req.query.searchTerm && { 
                 $or: [
-                    { title: { $regex: req.query.searchTerm, options: 'i' } },
-                    { content: { $regex: req.query.searchTerm, options: 'i' } },
+                    { title: { $regex: req.query.searchTerm, $options: 'i' } },
+                    { content: { $regex: req.query.searchTerm, $options: 'i' } },
                 ],
             }),
         }).sort({ updatedAt: sortDirection }).skip(startIndex).limit(limit);

@@ -12,7 +12,7 @@ export default function CallToAction() {
             </Button>
         </div>
         <div className="p-7 flex-1">
-            <img src="https://andreadams.com.br/wp-content/uploads/2023/12/Demystifying-JavaScript-A-Beginners-Guide.jpg" alt="cta_image" />
+            <img src="https://bairesdev.mo.cloudinary.net/blog/2023/08/What-Is-JavaScript-Used-For.jpg" alt="cta_image" />
         </div>
     </div>
   )
